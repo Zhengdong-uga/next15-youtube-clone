@@ -28,7 +28,7 @@ export const SuggestionsSection = ({
   )
 }
 
-const SuggestionsSectionSkeleton = () => {
+export const SuggestionsSectionSkeleton = () => {
   return (
     <>
       <div className="hidden md:block space-y-3">

@@ -25,7 +25,7 @@ export const VideoSection = ({ videoId }: VideoSectionProps) => {
   )
 };
 
-const VideoSectionSkeleton = () => {
+export const VideoSectionSkeleton = () => {
   return (
     <>
       <VideoPlayerSkeleton />

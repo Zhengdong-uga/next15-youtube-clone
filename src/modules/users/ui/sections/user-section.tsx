@@ -23,7 +23,7 @@ export const UserSection = (props: UserSectionProps) => {
   );
 };
 
-const UserSectionSkeleton = () => {
+export const UserSectionSkeleton = () => {
   return (
     <div className="flex flex-col">
       <UserPageBannerSkeleton />

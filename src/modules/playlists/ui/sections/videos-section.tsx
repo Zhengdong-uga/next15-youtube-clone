@@ -25,7 +25,7 @@ export const VideosSection = (props: VideosSectionProps) => {
   );
 };
 
-const VideosSectionSkeleton = () => {
+export const VideosSectionSkeleton = () => {
   return (
     <div>
       <div className="flex flex-col gap-4 gap-y-10 md:hidden">

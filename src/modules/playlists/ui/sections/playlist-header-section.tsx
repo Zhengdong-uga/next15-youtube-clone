@@ -26,7 +26,7 @@ export const PlaylistHeaderSection = ({
   )
 }
 
-const PlaylistHeaderSectionSkeleton = () => {
+export const PlaylistHeaderSectionSkeleton = () => {
   return (
     <div className="flex flex-col gap-y-2">
       <Skeleton className="h-6 w-24" />

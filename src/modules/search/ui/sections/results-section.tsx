@@ -28,7 +28,7 @@ export const ResultsSection = (props: ResultsSectionProps) => {
   );
 };
 
-const ResultsSectionSkeleton = () => {
+export const ResultsSectionSkeleton = () => {
   return (
     <div>
       <div className="hidden flex-col gap-4 md:flex">
