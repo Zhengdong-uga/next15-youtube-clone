@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { trpc } from "@/trpc/client";
-import { Separator } from "@/components/ui/separator";
 
 import { UserPageInfo, UserPageInfoSkeleton } from "../components/user-page-info";
 import { UserPageBanner, UserPageBannerSkeleton } from "../components/user-page-banner";
@@ -28,7 +27,6 @@ export const UserSectionSkeleton = () => {
     <div className="flex flex-col">
       <UserPageBannerSkeleton />
       <UserPageInfoSkeleton />
-      <Separator />
     </div>
   );
 };
@@ -37,7 +35,7 @@ const UserSectionSuspense = ({ userId }: UserSectionProps) => {
   const [user] = trpc.users.getOne.useSuspenseQuery({ id: userId });
 
   return (
-    <div className="flex flex-col -mx-4">
+    <div className="flex flex-col">
       <UserPageBanner user={user} />
       <UserPageInfo user={user} />
     </div>

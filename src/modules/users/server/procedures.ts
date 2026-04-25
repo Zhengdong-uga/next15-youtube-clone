@@ -12,6 +12,15 @@ export const usersRouter = createTRPCRouter({
       z.object({
         name: z.string().trim().min(1).max(100).optional(),
         description: z.string().max(5000).nullable().optional(),
+        location: z.string().max(200).nullable().optional(),
+        contactEmail: z.string().email().max(200).nullable().optional(),
+        currentStatus: z.string().max(100).nullable().optional(),
+        education: z.string().max(500).nullable().optional(),
+        skills: z.array(z.string().trim().min(1).max(50)).max(20).optional(),
+        links: z.array(z.object({
+          title: z.string().trim().min(1).max(100),
+          url: z.string().url().max(500),
+        })).max(10).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -20,6 +29,12 @@ export const usersRouter = createTRPCRouter({
         .set({
           ...(input.name !== undefined ? { name: input.name } : {}),
           ...(input.description !== undefined ? { description: input.description } : {}),
+          ...(input.location !== undefined ? { location: input.location } : {}),
+          ...(input.contactEmail !== undefined ? { contactEmail: input.contactEmail } : {}),
+          ...(input.currentStatus !== undefined ? { currentStatus: input.currentStatus } : {}),
+          ...(input.education !== undefined ? { education: input.education } : {}),
+          ...(input.skills !== undefined ? { skills: input.skills } : {}),
+          ...(input.links !== undefined ? { links: input.links } : {}),
           updatedAt: new Date(),
         })
         .where(eq(users.id, ctx.user.id))

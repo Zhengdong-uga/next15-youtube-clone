@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HomeIcon } from "lucide-react";
+import { HomeIcon, FlameIcon, UserCircleIcon } from "lucide-react";
 
 import { 
   SidebarGroup, 
@@ -12,11 +12,21 @@ import {
   SidebarMenuItem
 } from "@/components/ui/sidebar";
 
-const items = [
+const visitorItems = [
   {
     title: "Home",
     url: "/",
     icon: HomeIcon,
+  },
+  {
+    title: "Trending",
+    url: "/feed/trending",
+    icon: FlameIcon,
+  },
+  {
+    title: "You",
+    url: "#",
+    icon: UserCircleIcon,
   },
 ];
 
@@ -27,7 +37,7 @@ export const MainSection = () => {
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
+          {visitorItems.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 tooltip={item.title}

@@ -27,14 +27,14 @@ export const UserView = ({ userId }: UserViewProps) => {
     <div className="flex flex-col max-w-[1300px] px-4 pt-2.5 mx-auto mb-10">
       <UserSection userId={userId} />
 
-      <div className="border-b mt-4">
-        <div className="flex items-center gap-8 px-4 md:px-6">
+      <div className="border-b mt-2">
+        <div className="flex items-center gap-0">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "py-3 px-1 text-sm font-medium transition-colors relative uppercase tracking-wide",
+                "py-3 px-6 text-sm font-medium transition-colors relative",
                 tab === t.id
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -42,7 +42,7 @@ export const UserView = ({ userId }: UserViewProps) => {
             >
               {t.label}
               {tab === t.id && (
-                <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-foreground" />
+                <span className="absolute left-0 right-0 -bottom-px h-[3px] bg-foreground rounded-t-full" />
               )}
             </button>
           ))}

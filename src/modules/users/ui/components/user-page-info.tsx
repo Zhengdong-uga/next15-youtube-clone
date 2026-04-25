@@ -4,6 +4,7 @@ import { CheckCircle2 } from "lucide-react";
 
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 
@@ -14,17 +15,20 @@ interface UserPageInfoProps {
   user: UserGetOneOutput;
 }
 
+interface LinkItem {
+  title: string;
+  url: string;
+}
+
 export const UserPageInfoSkeleton = () => {
   return (
-    <div className="-mt-12 md:-mt-16 px-4 md:px-6">
-      <div className="flex items-start gap-4 md:gap-6">
-        <Skeleton className="h-20 w-20 md:h-32 md:w-32 rounded-full flex-shrink-0" />
-        <div className="flex-1 min-w-0 pt-2 md:pt-4">
-          <Skeleton className="h-7 w-48 md:h-9 md:w-64" />
-          <Skeleton className="h-4 w-32 mt-2" />
-          <Skeleton className="h-4 w-64 mt-1" />
-          <Skeleton className="h-9 w-28 mt-4 rounded-full" />
-        </div>
+    <div className="flex items-start gap-4 md:gap-6 pt-4 md:pt-6">
+      <Skeleton className="h-[72px] w-[72px] md:h-[128px] md:w-[128px] rounded-full flex-shrink-0" />
+      <div className="flex-1 min-w-0 pt-1 md:pt-2">
+        <Skeleton className="h-7 w-48 md:h-9 md:w-64" />
+        <Skeleton className="h-4 w-48 mt-2" />
+        <Skeleton className="h-4 w-72 mt-2" />
+        <Skeleton className="h-9 w-28 mt-4 rounded-full" />
       </div>
     </div>
   );
@@ -34,6 +38,10 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
   const { isAdmin, isLoaded } = useIsAdmin();
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
 
+  const links = (user.links ?? []) as LinkItem[];
+  const firstLink = links[0];
+  const remainingCount = links.length - 1;
+
   return (
     <>
       <ChannelDescriptionModal
@@ -41,60 +49,84 @@ export const UserPageInfo = ({ user }: UserPageInfoProps) => {
         open={showDescriptionModal}
         onOpenChange={setShowDescriptionModal}
       />
-      <div className="-mt-12 md:-mt-16 px-4 md:px-6 pb-4">
-        <div className="flex items-start gap-4 md:gap-6">
-          <UserAvatar
-            imageUrl={user.imageUrl}
-            name={user.name}
-            className="h-20 w-20 md:h-32 md:w-32 border-4 border-white flex-shrink-0"
-          />
-          <div className="flex-1 min-w-0 pt-2 md:pt-4">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl md:text-4xl font-bold truncate">{user.name}</h1>
-              <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground flex-shrink-0" />
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <span>@{user.name.toLowerCase().replace(/\s+/g, '')}</span>
-              <span>•</span>
-              <span>{user.videoCount} videos</span>
-            </div>
-            {user.description && (
-              <div className="text-sm text-muted-foreground mt-2">
-                <p className="line-clamp-2 inline">{user.description}</p>
-                {user.description.length > 100 && (
-                  <>
-                    {" "}
-                    <button
-                      onClick={() => setShowDescriptionModal(true)}
-                      className="font-medium text-foreground hover:text-foreground/80"
-                    >
-                      ...more
-                    </button>
-                  </>
-                )}
-              </div>
+      <div className="flex items-start gap-4 md:gap-6 pt-4 md:pt-6">
+        <UserAvatar
+          imageUrl={user.imageUrl}
+          name={user.name}
+          className="h-[72px] w-[72px] md:h-[128px] md:w-[128px] flex-shrink-0"
+        />
+        <div className="flex-1 min-w-0 pt-1 md:pt-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <h1 className="text-xl md:text-3xl font-bold truncate">{user.name}</h1>
+            <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
+            {user.currentStatus && (
+              <Badge variant="secondary" className="text-xs font-medium">
+                {user.currentStatus}
+              </Badge>
             )}
-            <div className="mt-4">
-              {!isLoaded ? (
-                <Skeleton className="h-9 w-28 rounded-full" />
-              ) : isAdmin ? (
-                <Button
-                  variant="secondary"
-                  asChild
-                  className="rounded-full"
+          </div>
+          <div className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground mt-0.5">
+            <span>@{user.name.toLowerCase().replace(/\s+/g, '')}</span>
+            {user.subscriberCount > 0 && (
+              <>
+                <span>·</span>
+                <span>{user.subscriberCount} subscribers</span>
+              </>
+            )}
+            <span>·</span>
+            <span>{user.videoCount} videos</span>
+          </div>
+          {user.description && (
+            <div className="text-sm text-muted-foreground mt-1">
+              <span className="line-clamp-1">
+                {user.description}
+              </span>
+              <button
+                onClick={() => setShowDescriptionModal(true)}
+                className="font-semibold text-foreground hover:text-foreground/80 text-sm"
+              >
+                ...more
+              </button>
+            </div>
+          )}
+          {firstLink && (
+            <div className="text-sm mt-1 flex items-center gap-1 flex-wrap">
+              <a
+                href={firstLink.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 font-medium"
+              >
+                {firstLink.url.replace(/^https?:\/\//, '')}
+              </a>
+              {remainingCount > 0 && (
+                <button
+                  onClick={() => setShowDescriptionModal(true)}
+                  className="font-semibold text-foreground hover:text-foreground/80"
                 >
-                  <Link prefetch href="/studio">Go to studio</Link>
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  className="rounded-full bg-black hover:bg-black/90 text-white"
-                  disabled
-                >
-                  Subscribe
-                </Button>
+                  and {remainingCount} more link{remainingCount > 1 ? 's' : ''}
+                </button>
               )}
             </div>
+          )}
+          <div className="mt-3">
+            {!isLoaded ? (
+              <Skeleton className="h-9 w-28 rounded-full" />
+            ) : isAdmin ? (
+              <Button
+                variant="secondary"
+                asChild
+                className="rounded-full"
+              >
+                <Link prefetch href="/studio">Go to studio</Link>
+              </Button>
+            ) : (
+              <Button
+                className="rounded-full bg-foreground text-background hover:bg-foreground/90 px-4"
+              >
+                Subscribe
+              </Button>
+            )}
           </div>
         </div>
       </div>

@@ -15,7 +15,7 @@ interface UserPageBannerProps {
 };
 
 export const UserPageBannerSkeleton = () => {
-  return <Skeleton className="w-full h-32 md:h-48" />
+  return <Skeleton className="w-full h-[120px] md:h-[172px] rounded-xl" />
 };
 
 export const UserPageBanner = ({ user: _user }: UserPageBannerProps) => {
@@ -31,8 +31,8 @@ export const UserPageBanner = ({ user: _user }: UserPageBannerProps) => {
         onOpenChange={setIsBannerUploadModalOpen}
       />
       <div className={cn(
-        "w-full h-32 md:h-48 bg-gradient-to-r from-gray-100 to-gray-200",
-        user.bannerUrl ? "bg-cover bg-center" : "bg-gray-100"
+        "w-full h-[120px] md:h-[172px] rounded-xl",
+        user.bannerUrl ? "bg-cover bg-center" : "bg-gradient-to-r from-gray-100 to-gray-200"
       )}
         style={{
           backgroundImage: user.bannerUrl
