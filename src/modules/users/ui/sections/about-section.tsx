@@ -61,6 +61,7 @@ const AboutSectionSuspense = ({ userId }: AboutSectionProps) => {
   const utils = trpc.useUtils();
 
   const [editing, setEditing] = useState(false);
+  const [draftName, setDraftName] = useState(user.name);
   const [draftDesc, setDraftDesc] = useState(user.description ?? "");
   const [draftLocation, setDraftLocation] = useState(user.location ?? "");
   const [draftEmail, setDraftEmail] = useState(user.contactEmail ?? "");
@@ -90,6 +91,7 @@ const AboutSectionSuspense = ({ userId }: AboutSectionProps) => {
   });
 
   const startEditing = () => {
+    setDraftName(user.name);
     setDraftDesc(user.description ?? "");
     setDraftLocation(user.location ?? "");
     setDraftEmail(user.contactEmail ?? "");
@@ -143,6 +145,7 @@ const AboutSectionSuspense = ({ userId }: AboutSectionProps) => {
         url: l.url.trim().match(/^https?:\/\//) ? l.url.trim() : `https://${l.url.trim()}`,
       }));
     update.mutate({
+      name: draftName.trim() || user.name,
       description: draftDesc.trim() || null,
       location: draftLocation.trim() || null,
       contactEmail: draftEmail.trim() || null,
@@ -166,6 +169,15 @@ const AboutSectionSuspense = ({ userId }: AboutSectionProps) => {
 
       {editing ? (
         <div className="space-y-6">
+          <div>
+            <label className="text-sm font-semibold mb-2 block">Channel Name</label>
+            <Input
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              placeholder="Your channel name"
+            />
+          </div>
+
           <div>
             <label className="text-sm font-semibold mb-2 block">Description</label>
             <Textarea

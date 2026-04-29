@@ -34,7 +34,7 @@ export const UserView = ({ userId }: UserViewProps) => {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "py-3 px-6 text-sm font-medium transition-colors relative",
+                "h-[48px] px-6 text-sm font-medium transition-colors relative inline-flex items-center",
                 tab === t.id
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground",

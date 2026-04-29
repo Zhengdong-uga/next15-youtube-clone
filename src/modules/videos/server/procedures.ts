@@ -468,6 +468,105 @@ export const videosRouter = createTRPCRouter({
 
       return updatedVideo;
     }),
+  syncMuxStatus: baseProcedure
+    .input(
+      z.object({
+        videoId: z.string().uuid(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { videoId } = input;
+
+      const [existingVideo] = await db
+        .select()
+        .from(videos)
+        .where(eq(videos.id, videoId));
+
+      if (!existingVideo) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      // If already ready, no need to sync
+      if (existingVideo.muxStatus === "ready") {
+        return existingVideo;
+      }
+
+      // Check Mux upload status
+      if (!existingVideo.muxUploadId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "No Mux upload ID" });
+      }
+
+      const upload = await mux.video.uploads.retrieve(existingVideo.muxUploadId);
+
+      if (!upload || !upload.asset_id) {
+        // Upload might not be complete yet or failed
+        if (upload?.status === "errored") {
+          await db
+            .update(videos)
+            .set({ muxStatus: "errored" })
+            .where(eq(videos.id, videoId));
+        }
+        return existingVideo;
+      }
+
+      // Get the asset status
+      const asset = await mux.video.assets.retrieve(upload.asset_id);
+
+      if (!asset) {
+        return existingVideo;
+      }
+
+      const playbackId = asset.playback_ids?.[0].id;
+
+      if (asset.status === "ready" && playbackId) {
+        // Asset is ready, generate thumbnail and update database
+        const tempThumbnailUrl = `https://image.mux.com/${playbackId}/thumbnail.jpg`;
+        const tempPreviewUrl = `https://image.mux.com/${playbackId}/animated.gif`;
+        const duration = asset.duration ? Math.round(asset.duration * 1000) : 0;
+
+        const utapi = new UTApi();
+        const [
+          uploadedThumbnail,
+          uploadedPreview,
+        ] = await utapi.uploadFilesFromUrl([
+          tempThumbnailUrl,
+          tempPreviewUrl,
+        ]);
+
+        if (!uploadedThumbnail.data || !uploadedPreview.data) {
+          console.error("Failed to upload thumbnail or preview during sync");
+        }
+
+        const { key: thumbnailKey, url: thumbnailUrl } = uploadedThumbnail.data || { key: null, url: null };
+        const { key: previewKey, url: previewUrl } = uploadedPreview.data || { key: null, url: null };
+
+        const [updated] = await db
+          .update(videos)
+          .set({
+            muxStatus: asset.status,
+            muxPlaybackId: playbackId,
+            muxAssetId: asset.id,
+            thumbnailUrl: thumbnailUrl || undefined,
+            thumbnailKey: thumbnailKey || undefined,
+            previewUrl: previewUrl || undefined,
+            previewKey: previewKey || undefined,
+            duration,
+          })
+          .where(eq(videos.id, videoId))
+          .returning();
+
+        return updated;
+      }
+
+      if (asset.status === "errored") {
+        await db
+          .update(videos)
+          .set({ muxStatus: "errored" })
+          .where(eq(videos.id, videoId));
+      }
+
+      return existingVideo;
+    }),
   create: protectedProcedure.mutation(async ({ ctx }) => {
     const { id: userId } = ctx.user;
 

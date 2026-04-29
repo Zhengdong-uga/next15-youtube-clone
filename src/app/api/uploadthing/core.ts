@@ -53,6 +53,47 @@ export const ourFileRouter = {
 
       return { uploadedBy: metadata.userId};
     }),
+  avatarUploader: f({
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const adminUserId = await getCurrentAdminUserId();
+
+      if (!adminUserId) throw new UploadThingError("Unauthorized");
+
+      const [existingUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, adminUserId));
+
+      if (!existingUser) throw new UploadThingError("Unauthorized");
+
+      if (existingUser.imageKey) {
+        const utapi = new UTApi();
+
+        await utapi.deleteFiles(existingUser.imageKey);
+        await db
+          .update(users)
+          .set({ imageKey: null })
+          .where(eq(users.id, existingUser.id));
+      }
+
+      return { userId: existingUser.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      await db
+        .update(users)
+        .set({
+          imageUrl: file.url,
+          imageKey: file.key,
+        })
+        .where(eq(users.id, metadata.userId));
+
+      return { uploadedBy: metadata.userId };
+    }),
   thumbnailUploader: f({
     image: {
       maxFileSize: "4MB",

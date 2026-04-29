@@ -2,17 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  HomeIcon,
-  FlameIcon,
-  PlaySquareIcon,
-  UserCircleIcon,
-  HistoryIcon,
-} from "lucide-react";
+import { ZapIcon, FlagIcon } from "lucide-react";
 
 import { 
   SidebarGroup, 
   SidebarGroupContent, 
+  SidebarGroupLabel,
   SidebarMenu, 
   SidebarMenuButton, 
   SidebarMenuItem
@@ -20,37 +15,23 @@ import {
 
 const items = [
   {
-    title: "Home",
-    url: "/",
-    icon: HomeIcon,
+    title: "CaseTube Premium",
+    url: "/premium",
+    icon: ZapIcon,
   },
   {
-    title: "Trending",
-    url: "/feed/trending",
-    icon: FlameIcon,
-  },
-  {
-    title: "Subscriptions",
-    url: "/feed/subscriptions",
-    icon: PlaySquareIcon,
-  },
-  {
-    title: "You",
-    url: "#",
-    icon: UserCircleIcon,
-  },
-  {
-    title: "History",
-    url: "/playlists/history",
-    icon: HistoryIcon,
+    title: "CaseTube Studio",
+    url: "/studio",
+    icon: FlagIcon,
   },
 ];
 
-export const MainSection = () => {
+export const MoreFromSection = () => {
   const pathname = usePathname();
 
   return (
     <SidebarGroup>
+      <SidebarGroupLabel>More from CaseTube</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (

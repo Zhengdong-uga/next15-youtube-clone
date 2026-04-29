@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { eq, and, or, lt, desc, getTableColumns, not } from "drizzle-orm";
+import { eq, and, or, lt, desc, getTableColumns, not, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
@@ -50,9 +50,12 @@ export const suggestionsRouter = createTRPCRouter({
       .where(and(
         not(eq(videos.id, existingVideo.id)),
         eq(videos.visibility, "public"),
-        existingVideo.categoryId
-        ? eq(videos.categoryId, existingVideo.categoryId)
-        : undefined,
+        or(
+          eq(videos.userId, existingVideo.userId),
+          existingVideo.categoryId
+            ? eq(videos.categoryId, existingVideo.categoryId)
+            : undefined,
+        ),
         cursor
           ? or(
               lt(videos.updatedAt, cursor.updatedAt),
@@ -62,7 +65,12 @@ export const suggestionsRouter = createTRPCRouter({
                 )
               )
           : undefined,
-      )).orderBy(desc(videos.updatedAt), desc(videos.id))
+      ))
+      .orderBy(
+        sql`${videos.userId} = ${existingVideo.userId} DESC`,
+        desc(videos.updatedAt),
+        desc(videos.id)
+      )
       // Add 1 to the limit to check if there is more data
       .limit(limit + 1)
 

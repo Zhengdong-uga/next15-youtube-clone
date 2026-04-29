@@ -56,16 +56,27 @@ const SuggestionsSectionSuspense = ({
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
+  const allItems = suggestions.pages.flatMap((page) => page.items);
+  const firstCreator = allItems[0]?.user;
+  const hasCreatorVideos = firstCreator && allItems.some((v) => v.userId === firstCreator.id);
+
   return (
     <>
+      {hasCreatorVideos && firstCreator && (
+        <div className="hidden md:block mb-3">
+          <p className="text-sm font-semibold">
+            More from {firstCreator.name}
+          </p>
+        </div>
+      )}
       <div className="hidden md:block space-y-3">
-        {suggestions.pages.flatMap((page) => page.items.map((video) => (
+        {allItems.map((video) => (
           <VideoRowCard
             key={video.id}
             data={video}
             size="compact"
           />
-        )))}
+        ))}
       </div>
       <div className="block md:hidden space-y-10">
         {suggestions.pages.flatMap((page) => page.items.map((video) => (

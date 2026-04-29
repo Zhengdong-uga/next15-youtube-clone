@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { format } from "date-fns";
-import { Globe2Icon, LockIcon } from "lucide-react";
+import { Globe2Icon, LockIcon, RefreshCwIcon } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { trpc } from "@/trpc/client";
@@ -11,6 +11,7 @@ import { DEFAULT_LIMIT } from "@/constants";
 import { snakeCaseToTitle } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InfiniteScroll } from "@/components/infinite-scroll";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -93,6 +94,24 @@ const VideosSectionSuspense = () => {
   }, {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
+  const utils = trpc.useUtils();
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+  const syncMuxStatus = trpc.videos.syncMuxStatus.useMutation({
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();
+      setSyncingId(null);
+    },
+    onError: () => {
+      setSyncingId(null);
+    },
+  });
+
+  const handleSync = (e: React.MouseEvent, videoId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSyncingId(videoId);
+    syncMuxStatus.mutate({ videoId });
+  };
 
   return (
     <div>
@@ -116,8 +135,8 @@ const VideosSectionSuspense = () => {
                   <TableCell className="pl-6">
                     <div className="flex items-center gap-4">
                       <div className="relative aspect-video w-36 shrink-0">
-                        <VideoThumbnail 
-                          imageUrl={video.thumbnailUrl} 
+                        <VideoThumbnail
+                          imageUrl={video.thumbnailUrl}
                           previewUrl={video.previewUrl}
                           title={video.title}
                           duration={video.duration || 0}
@@ -142,8 +161,19 @@ const VideosSectionSuspense = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2">
                       {snakeCaseToTitle(video.muxStatus || "error")}
+                      {video.muxStatus !== "ready" && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="size-6"
+                          onClick={(e) => handleSync(e, video.id)}
+                          disabled={syncingId === video.id}
+                        >
+                          <RefreshCwIcon className={`size-3 ${syncingId === video.id ? "animate-spin" : ""}`} />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-sm truncate">
